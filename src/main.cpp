@@ -24,7 +24,7 @@ void findInsert(std::string& word, Dictionary* dictionary, set<string>* result);
 void outputSuggestions(set<string>* result, std::string indent);
 
 // program arguments to run, example: main.exe ../../res/wordlist.txt ../../res/test.txt
-int main(int argc, char* argv[]) {
+int main1(int argc, char* argv[]) {
 	// Output usage message if improper command line args were given.
 	if (argc != 3)
     {
@@ -51,6 +51,19 @@ int main(int argc, char* argv[]) {
 	return EXIT_SUCCESS;
 }
 
+int main()
+{
+    Dictionary dictionary;
+    dictionary.insert("maxim");
+    dictionary.insert("maxim");
+
+    cout << dictionary.size() << endl;
+
+    dictionary.remove("maxim");
+
+    cout << dictionary.size() << endl;
+}
+
 void checkSpelling(ifstream& in, Dictionary& dict) {
 
 	int line_number = 0;
@@ -74,7 +87,7 @@ void checkSpelling(ifstream& in, Dictionary& dict) {
             if(dict.search(word))
                 continue;
 
-            printf("Line %d: '%s'\r\n", line_number, word.c_str());
+            printf("line %d: '%s'\r\n", line_number, word.c_str());
             cout << "\tsuggestions:\r\n";
 
             set<string> suggestions;

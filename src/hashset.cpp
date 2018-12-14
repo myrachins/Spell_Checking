@@ -41,10 +41,10 @@ void HashSet<key_type,hash_func,key_equal>::remove(const key_type& k)
         {
             (*ht)[p].used = false;
             entries--;
-            break;
+            return;
         }
     }
-    // if element wasn't found we do nothing
+    throw std::invalid_argument("This element can't be deleted");
 }
 
 

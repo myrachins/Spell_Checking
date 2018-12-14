@@ -47,5 +47,6 @@ class Dictionary: public HashSet<string, hash_function, equality> {
     // Complete definition
 public:
 	explicit Dictionary(string filename);
+	Dictionary() : HashSet() { }
 };
 #endif // _DICTIONARY_H_
