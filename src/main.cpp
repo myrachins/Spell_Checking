@@ -16,7 +16,7 @@ void lower(string& s);
 string stripPunct(const string& s);
 void checkSpelling(ifstream& in, Dictionary& dict);
 
-void findTransp(std::string& word, Dictionary* dictionary, set<string>* result);
+void findTransp(std::string& word, Dictionary* dictionary, set<string>* result, int ind = 0);
 void findDelete(std::string& word, Dictionary* dictionary, set<string>* result);
 void findReplace(std::string& word, Dictionary* dictionary, set<string>* result);
 void findInsert(std::string& word, Dictionary* dictionary, set<string>* result);
@@ -24,7 +24,7 @@ void findInsert(std::string& word, Dictionary* dictionary, set<string>* result);
 void outputSuggestions(set<string>* result, std::string indent);
 
 // program arguments to run, example: main.exe ../../res/wordlist.txt ../../res/test.txt
-int main1(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	// Output usage message if improper command line args were given.
 	if (argc != 3)
     {
@@ -49,19 +49,6 @@ int main1(int argc, char* argv[]) {
 	inf.close();
 
 	return EXIT_SUCCESS;
-}
-
-int main()
-{
-    Dictionary dictionary;
-    dictionary.insert("maxim");
-    dictionary.insert("maxim");
-
-    cout << dictionary.size() << endl;
-
-    dictionary.remove("maxim");
-
-    cout << dictionary.size() << endl;
 }
 
 void checkSpelling(ifstream& in, Dictionary& dict) {
@@ -124,15 +111,16 @@ string stripPunct(const string& s) {
 	}
 }
 
-void findTransp(std::string& word, Dictionary* dictionary, set<string>* result)
+void findTransp(std::string& word, Dictionary* dictionary, set<string>* result, int ind)
 {
-    for(int i = 0; i < word.size() - 1; i++)
+    for(int i = ind; i < word.size() - 1; i++)
     {
         string transpWord = word;
         transpWord[i] = word[i + 1];
         transpWord[i + 1] = word[i];
         if(dictionary->search(transpWord))
             result->insert(transpWord);
+        findTransp(transpWord, dictionary, result, i + 2);
     }
 }
 
