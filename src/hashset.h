@@ -1,6 +1,6 @@
 // template hash set class
 
-#ifndef  _HASHSET_H_ 
+#ifndef  _HASHSET_H_
 #define  _HASHSET_H_
 
 #include <iostream>
@@ -14,13 +14,18 @@ template<class key_type, class hash_func, class key_equal>
 class  HashSet {
 
 protected:
-    // hashtable entries 
+    // hashtable entries
     class Entry {
-        public:
-        key_type key;
-        bool used;
+    public:
+        enum State {Removed, Empty, Full};
 
-        Entry() : used(false) {}
+    public:
+        key_type key;
+        State state;
+//        bool used;
+//        bool empty;
+
+        Entry() : state(Empty) {}
     };
 
     int entries;      // number of entries
@@ -33,17 +38,17 @@ protected:
     int table_size()  const {return prime_list[prime];}
     float load_factor() const {return float(size()) / table_size();}
     int resize();
-    
+
 public:
 // we do not compute prime numbers but use a table instead
-static const int num_primes;
-static const unsigned long prime_list[];
+    static const int num_primes;
+    static const unsigned long prime_list[];
 
-    HashSet(): entries(0), prime(0),ht(new vector<Entry>(prime_list[0])){};
-          
-    virtual ~HashSet() { 
-		delete ht;
-	}
+    HashSet(): entries(0), prime(0), ht(new vector<Entry>(prime_list[0])){};
+
+    virtual ~HashSet() {
+        delete ht;
+    }
 
     virtual int size() const {return entries;}
     virtual bool search(const key_type& k);

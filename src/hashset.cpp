@@ -7,7 +7,7 @@ const int HashSet<key_type,hash_func,key_equal>::num_primes = 25;
 
 
 template<class key_type, class hash_func, class key_equal>
-const unsigned long HashSet<key_type,hash_func,key_equal>::prime_list[] = 
+const unsigned long HashSet<key_type,hash_func,key_equal>::prime_list[] =
         {53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, 98317,
          196613, 393241, 786433, 1572869, 3145739, 6291469, 12582917, 25165843,
          50331653, 100663319, 201326611, 402653189, 805306457};
@@ -18,31 +18,34 @@ bool HashSet<key_type,hash_func,key_equal>::search(const key_type& k) {
 
     int p = hf(k) % table_size();
 
-    while ((*ht)[p].used) {
-        if (eq((*ht)[p].key, k)) {       // equality predicate for key_type
+    while (ht->at(p).state == Entry::Full || ht->at(p).state == Entry::Removed)
+    {
+        if (eq(ht->at(p).key, k))
             return true;
-        }
-        p++;
-        if (p == table_size()) {
-            p = 0;  // wrap around to beginning
-        }
-    }
 
+        p++;
+        if (p == table_size())
+            p = 0;
+    }
     return false;
 }
 
 template<class key_type, class hash_func, class key_equal>
 void HashSet<key_type,hash_func,key_equal>::remove(const key_type& k)
 {
-    for(int offset = 0; offset < table_size(); offset++)
+    int p = hf(k) % table_size();
+
+    while (ht->at(p).state == Entry::Full || ht->at(p).state == Entry::Removed)
     {
-        int p = (hf(k) + offset) % table_size();
-        if (eq((*ht)[p].key, k))      // equality predicate for key_type
+        if (eq(ht->at(p).key, k))
         {
-            (*ht)[p].used = false;
+            ht->at(p).state = Entry::Removed;
             entries--;
             return;
         }
+        p++;
+        if (p == table_size())
+            p = 0;
     }
     throw std::invalid_argument("This element can't be deleted");
 }
@@ -57,15 +60,15 @@ void HashSet<key_type,hash_func,key_equal>::insert(const key_type& k)
 
     int p = hf(k) % table_size();
 
-    while ((*ht)[p].used) {
+    while (ht->at(p).state == Entry::Full)
+    {
         p++;
         if(p == table_size())
             p = 0;
     }
-    (*ht)[p].used = true;
+    ht->at(p).state = Entry::Full;
     (*ht)[p].key = k;
     entries++;
-    
 }
 
 template<class key_type, class hash_func, class key_equal>
@@ -82,15 +85,15 @@ int HashSet<key_type,hash_func,key_equal>::resize() {
 
     for(int i = 0; i < prevSize; i++)
     {
-        if((*ht)[i].used) {
+        if(ht->at(i).state == Entry::Full) {
             int p = hf((*ht)[i].key) % newSize;
 
-            while ((newStorage)[p].used) {
+            while (newStorage[p].state == Entry::Full) {
                 p++;
-                if(p == table_size())
+                if(p == newSize)
                     p = 0;
             }
-            (newStorage)[p].used = true;
+            (newStorage)[p].state = Entry::Full;
             (newStorage)[p].key = (*ht)[i].key;
         }
     }
