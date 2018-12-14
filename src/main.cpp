@@ -74,8 +74,9 @@ void checkSpelling(ifstream& in, Dictionary& dict) {
             if(dict.search(word))
                 continue;
 
-            printf("line %d: '%s'\r\n", line_number, word.c_str());
-            cout << "\tsuggestions:\r\n";
+            printf("line %d: '%s'", line_number, word.c_str());
+            cout << endl;
+            cout << "\tsuggestions:" << endl;
 
             set<string> suggestions;
             findTransp(word, &dict, &suggestions);
