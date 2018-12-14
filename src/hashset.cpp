@@ -34,22 +34,37 @@ bool HashSet<key_type,hash_func,key_equal>::search(const key_type& k) {
 template<class key_type, class hash_func, class key_equal>
 void HashSet<key_type,hash_func,key_equal>::remove(const key_type& k)
 {
-
-    // TODO: complete...
-    
+    for(int offset = 0; offset < table_size(); offset++)
+    {
+        int p = (hf(k) + offset) % table_size();
+        if (eq((*ht)[p].key, k))      // equality predicate for key_type
+        {
+            (*ht)[p].used = false;
+            entries--;
+            break;
+        }
+    }
+    // if element wasn't found we do nothing
 }
 
 
 template<class key_type, class hash_func, class key_equal>
 void HashSet<key_type,hash_func,key_equal>::insert(const key_type& k)
 {
-
     if (load_factor() > .7) {
         resize();
     }
 
+    int p = hf(k) % table_size();
 
-    // TODO: complete...
+    while ((*ht)[p].used) {
+        p++;
+        if(p == table_size())
+            p = 0;
+    }
+    (*ht)[p].used = true;
+    (*ht)[p].key = k;
+    entries++;
     
 }
 
@@ -57,16 +72,31 @@ template<class key_type, class hash_func, class key_equal>
 int HashSet<key_type,hash_func,key_equal>::resize() {
 
     if (prime == num_primes - 1) {
-        cerr << "maximal table size reached, aborting ... " << endl;
+        std::cerr << "maximal table size reached, aborting ... " << std::endl;
         exit(2);
     }
 
-    int mm = prime_list[prime];
+    int prevSize = prime_list[prime];
+    int newSize = prime_list[prime + 1]; // counting new size of storage
+    std::vector<Entry> newStorage(newSize);
+
+    for(int i = 0; i < prevSize; i++)
+    {
+        if((*ht)[i].used) {
+            int p = hf((*ht)[i].key) % newSize;
+
+            while ((newStorage)[p].used) {
+                p++;
+                if(p == table_size())
+                    p = 0;
+            }
+            (newStorage)[p].used = true;
+            (newStorage)[p].key = (*ht)[i].key;
+        }
+    }
+
+    ht->swap(newStorage);
     prime++;
-    int m = prime_list[prime];
-    vector<Entry>* ptr = new vector<Entry>(m);
 
-
-    // TODO: complete...
-    
+    return newSize;
 }

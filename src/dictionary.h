@@ -18,10 +18,17 @@ class hash_function
 public:
 
     unsigned int operator()( const string& s )  const {
-        
-        
-        // Complete definition
-        
+        unsigned int hash = 0;
+
+        for(int i = 0; i < s.length(); i++)
+        {
+            if(i & 1)
+                hash ^= (~((hash << 11) + s[i] ^ (hash >> 5)));
+            else
+                hash ^= ((hash << 7) ^ s[i] * (hash >> 3));
+        }
+
+        return hash;
     }
 };
 
@@ -39,7 +46,6 @@ class Dictionary: public HashSet<string, hash_function, equality> {
 
     // Complete definition
 public:
-	Dictionary(string filename);
-
+	explicit Dictionary(string filename);
 };
 #endif // _DICTIONARY_H_

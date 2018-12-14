@@ -16,11 +16,15 @@ void lower(string& s);
 string stripPunct(const string& s);
 void checkSpelling(ifstream& in, Dictionary& dict);
 
+void findTransp(std::string& word, Dictionary* dictionary, set<string>* result);
+void findDelete(std::string& word, Dictionary* dictionary, set<string>* result);
+void findReplace(std::string& word, Dictionary* dictionary, set<string>* result);
+void findInsert(std::string& word, Dictionary* dictionary, set<string>* result);
 
+void outputSuggestions(set<string>* result, std::string indent);
 
 // program arguments to run, example: main.exe ../../res/wordlist.txt ../../res/test.txt
 int main(int argc, char* argv[]) {
-	
 	// Output usage message if improper command line args were given.
 	if (argc != 3)
     {
@@ -29,17 +33,17 @@ int main(int argc, char* argv[]) {
 	}
 
 	ifstream inf(argv[2]);
-	if (! inf) 
+	if (! inf)
     {
 		cerr << "Could not open " << argv[2] << "\n";
 		return EXIT_FAILURE;
 	}
-	
+
 	// Read dictionary, but let user know what we are working on.
 	cout << "Loading dictionary, this may take awhile...\n";
 
 	Dictionary d(argv[1]);
-    
+
 	checkSpelling(inf, d);
 
 	inf.close();
@@ -60,11 +64,26 @@ void checkSpelling(ifstream& in, Dictionary& dict) {
 
   	    stringstream ss (stringstream::in | stringstream::out);
 		ss << line;
-		
+
 		string word;
 		while (ss >> word) 
         {
-            // TODO: Complete the spell check of each word
+            lower(word);
+            word = stripPunct(word);
+
+            if(dict.search(word))
+                continue;
+
+            printf("Line %d: '%s'\r\n", line_number, word.c_str());
+            cout << "\tsuggestions:\r\n";
+
+            set<string> suggestions;
+            findTransp(word, &dict, &suggestions);
+            findDelete(word, &dict, &suggestions);
+            findReplace(word, &dict, &suggestions);
+            findInsert(word, &dict, &suggestions);
+
+            outputSuggestions(&suggestions, "\t\t");
 		}
 	}
 }
@@ -90,4 +109,62 @@ string stripPunct(const string& s) {
     {
 		return s;
 	}
+}
+
+void findTransp(std::string& word, Dictionary* dictionary, set<string>* result)
+{
+    for(int i = 0; i < word.size() - 1; i++)
+    {
+        string transpWord = word;
+        transpWord[i] = word[i + 1];
+        transpWord[i + 1] = word[i];
+        if(dictionary->search(transpWord))
+            result->insert(transpWord);
+    }
+}
+
+void findDelete(std::string& word, Dictionary* dictionary, set<string>* result)
+{
+    for(int i = 0; i < word.size(); i++)
+    {
+        string remWord = word.substr(0, i) + word.substr(i + 1, word.size() - 1);
+        if(dictionary->search(remWord))
+            result->insert(remWord);
+    }
+}
+
+void findReplace(std::string& word, Dictionary* dictionary, set<string>* result)
+{
+    for(int i = 0; i < word.size(); i++)
+    {
+        for(char symb = 'a'; symb <= 'z'; symb++)
+        {
+            string newWord = word;
+            newWord[i] = symb;
+            if(dictionary->search(newWord))
+                result->insert(newWord);
+        }
+    }
+}
+
+void findInsert(std::string& word, Dictionary* dictionary, set<string>* result)
+{
+    for(int i = 0; i <= word.size(); i++)
+    {
+        for (char symb = 'a'; symb <= 'z'; symb++)
+        {
+            string insertWord = word.substr(0, i) + symb + word.substr(i, word.size());
+            if(dictionary->search(insertWord))
+                result->insert(insertWord);
+        }
+    }
+}
+
+void outputSuggestions(set<string>* result, std::string indent)
+{
+    if(result->size() == 0)
+        cout << indent << "No suggestions were found" << endl;
+
+    for (const string& suggestion : *result)
+        cout << indent << suggestion << endl;
 }
