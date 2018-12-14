@@ -20,7 +20,7 @@ bool HashSet<key_type,hash_func,key_equal>::search(const key_type& k) {
 
     while (ht->at(p).state == Entry::Full || ht->at(p).state == Entry::Removed)
     {
-        if (eq(ht->at(p).key, k))
+        if (ht->at(p).state == Entry::Full && eq(ht->at(p).key, k))
             return true;
 
         p++;
